@@ -16,21 +16,21 @@ class WikiTooltipsCore {
    * @var bool
    */
   private static $mIsTooltipAttachmentSafe = true;
-  
+
   /**
    * Indicates if we're in the parser because we're parsing the content of a tooltip. There is no value in adding
    * tooltips to content inside a tooltip, and it can even lead to potential fatal errors by calling the parser
    * recursively, so when this is true, attaching tooltips to content is disabled.
-   * @return bool 
+   * @return bool
    */
   public static function isTooltipAttachmentSafe() {
     return self::$mIsTooltipAttachmentSafe;
   }
-  
+
   /**
    * Gets a Title object for the appropriate filter category, or returns null if there is an error getting it. Note
    * this function does not check to see if category filtering is disabled.
-   * @return The Title object of the appropriate root category or null if there is an error generating it..
+   * @return Title The Title object of the appropriate root category or null if there is an error generating it..
    */
   public static function getFilterCategoryTitle( $conf ) {
     if ( $conf->enablingCategory() !== null ) {
@@ -39,7 +39,7 @@ class WikiTooltipsCore {
       return Title::newFromText( $conf->disablingCategory(), NS_CATEGORY );
     }
   }
-  
+
   /**
    * This function will check if the given page title references a redirect and returns the redirect target title if
    * it does; otherwise, it returns the title given.
@@ -54,10 +54,10 @@ class WikiTooltipsCore {
         return $target;
       }
     }
-    
+
     return $title;
   }
-  
+
   /**
    * Indicate tooltip attachment is unsafe in the current state. (Usually means we're parsing the content of a tooltip,
    * so the attachment process is likely to call the parser redundantly and cause a fatal error.)
@@ -65,14 +65,14 @@ class WikiTooltipsCore {
   public static function flagTooltipAttachmentUnsafe( ) {
     self::$mIsTooltipAttachmentSafe = false;
   }
-  
+
   /**
    * Indicate tooltip attachment is safe in the current state.
    */
   public static function flagTooltipAttachmentSafe( ) {
     self::$mIsTooltipAttachmentSafe = true;
   }
-  
+
   /**
    * Parser output is wrapped within at least a p tag, and in more recent MediaWiki versions, an outer div. These are
    * undesirable when trying to parse down to just a page title, so this function is here to remove them.
@@ -91,7 +91,7 @@ class WikiTooltipsCore {
     }
     return trim( $new );
   }
-  
+
   /**
    * Returns the wikitext used to retrieve the appropriate content for a given tooltip page.
    * @param Title $title A title object for the given tooltip page.
@@ -129,7 +129,7 @@ class WikiTooltipsCore {
         $displayText = trim( $frame->expand( $params[1] ) );
       } else if ( isset( $params[0] ) ) {
         $displayText = trim( $frame->expand( $params[0] ) );
-      } 
+      }
       return Array( $displayText, 'noparse' => false );
     }
   }
