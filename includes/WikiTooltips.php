@@ -361,7 +361,7 @@ class WikiTooltips {
     if ( self::$mParser !== null && $titleText !== null && trim( $titleText ) !== '' ) {
       $title = Title::newFromText( $titleText );
       WikiTooltipsCore::flagTooltipAttachmentUnsafe(); // tooltip attaching risks fatal redundant parse here, so disable
-      $parserOptions = ParserOptions::newCanonical( 'canonical' );
+      $parserOptions = new ParserOptions();
       $out = self::$mParser->parse( WikiTooltipsCore::getTooltipWikiText( $title ),
                                     $title,
                                     $parserOptions,
@@ -495,7 +495,7 @@ class WikiTooltips {
                                                                              )
                                                                      ->plain();
           $messageTitle = Title::newFromText( 'MediaWiki:To-tooltip-page-name' );
-          $parserOptions = ParserOptions::newCanonical( 'canonical' );
+          $parserOptions = new ParserOptions();
           $tooltipTitleParse = self::$mParser->parse( $tooltipTitleWikitext,
                                                       $messageTitle,
                                                       $parserOptions,
