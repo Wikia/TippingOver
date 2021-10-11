@@ -125,9 +125,6 @@ class WikiTooltips {
   private static $mUseTwoRequestProcess;
   
   /**
-   * Run in the BeforeInitialize hook, this attachs functions to various hooks for tooltip processing and registers
-   * the JavaScript module if the current page is in a namespace where tooltips are enabled.
-   * @global Array $wgHooks The global where hooks are registered in MediaWiki.
    * @param Title $title The title being requested.
    * @param Article $article The article object. Ignored.
    * @param OutputPage $output The output page.
@@ -136,6 +133,27 @@ class WikiTooltips {
    * @param MediaWiki $mediawiki The MediaWiki object. Ignored.
    */
   static public function initializeHooksAndModule( &$title, &$article, &$output, &$user, $request, $mediawiki ) {
+    self::initialize(
+      $title,
+      $output
+    );
+  }
+
+  static public function onApiBeforeMain( ApiMain $apiMain ) {
+    self::initialize(
+      $apiMain->getTitle(),
+      $apiMain->getOutput()
+    );
+  }
+
+  /**
+   * Run in the BeforeInitialize hook, this attachs functions to various hooks for tooltip processing and registers
+   * the JavaScript module if the current page is in a namespace where tooltips are enabled.
+   *
+   * @param $title
+   * @param $output
+   */
+  static public function initialize( $title, $output ) {
     self::$mConf = new TippingOverConfiguration();
 
     if ( self::enabledForTitle( $title ) ) {

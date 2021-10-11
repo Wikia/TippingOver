@@ -67,6 +67,7 @@
   },
   "Hooks": {
     "BeforeInitialize" : "WikiTooltips::initializeHooksAndModule",
+    "ApiBeforeMain" : "WikiTooltips::onApiBeforeMain",
     "ParserFirstCallInit" : "WikiTooltips::initializeParserHooks",
     "MakeGlobalVariablesScript": "WikiTooltips::registerParsedConfigVarsForScriptExport",
     "HtmlPageLinkRendererEnd": "WikiTooltips::linkTooltipRender",
