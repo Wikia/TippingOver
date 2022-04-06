@@ -4,7 +4,7 @@
  * This is a simple top-level API module that provides some shortcut API queries that allow certain backend calls to
  * be performed by TippingOver in a single request, rather than the two that would be needed in some cases by using
  * the standard available queries.
- * 
+ *
  * @author Eyes <eyes@aeongarden.com>
  * @copyright Copyright � 2015 Eyes
  * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
@@ -16,20 +16,19 @@ class APIQueryTooltip extends APIBase {
    * @var ParserOptions
    */
   private $mParserOptions = null;
-  
+
   /**
    * Holds the TippingOver configuration.
    * @var TippingOverConfiguration
    */
   private $mConf = null;
-  
+
   /**
    * Initializes a ParserOptions instance.
    */
   private function initializeParserOptions() {
     if ( $this->mParserOptions === null ) {
-      $this->mParserOptions = new ParserOptions();
-      $this->mParserOptions->setEditSection( false );
+      $this->mParserOptions = ParserOptions::newCanonical( $this->getContext() );
       $this->mParserOptions->setWrapOutputClass( null );
     }
   }
@@ -39,23 +38,30 @@ class APIQueryTooltip extends APIBase {
    * are invalid.
    * @return Array An array with the available option keywords as keys and true or false as values.
    */
-  private function getOptions() {
-    $optionValues = Array();
-    $optionKeywords = Array( "follow", "exists", "title", "image", "cat", "text" );
+  private function getOptions(): array {
+    $optionKeywords = [ 'follow', 'exists', 'title', 'image', 'cat', 'text' ];
     if ( isset( $this->params['options'] ) ) {
-      $optionValues = $this->parseMultiValue( 'options', $this->params['options'], true, $optionKeywords );
+	  $optionValues = array_intersect(
+		explode(
+		  substr( $this->params['options'], 0, 1 ) === "\x1f" ? "\x1f" : "|",
+		  substr( $this->params['options'], 0, 1 ) === "\x1f"
+		    ? substr( $this->params['options'], 1 )
+			: $this->params['options'],
+		  50
+		),
+		$optionKeywords
+	  );
     }
-    $options = Array();
-    $options['follow'] = in_array( "follow", $optionValues );
-    $options['exists'] = in_array( "exists", $optionValues );
-    $options['title'] = in_array( "title", $optionValues );
-    $options['image'] = in_array( "image", $optionValues );
-    $options['cat'] = in_array( "cat", $optionValues );
-    if ( $options['cat'] && !isset( $this->params['target'] ) ) {
+
+	$options = [];
+	foreach ( $optionKeywords as $keyword ) {
+		$options[ $keyword ] = in_array( $keyword, $optionValues ?? [] );
+	}
+
+	if ( $options['cat'] && !isset( $this->params['target'] ) ) {
       $this->dieWithError( 'Category filtering cannot be done without the target parameter.', 'no_target_for_cat_filter' );
     }
-    $options['text'] = in_array( "text", $optionValues );
-    
+
     return $options;
   }
   
@@ -135,7 +141,7 @@ class APIQueryTooltip extends APIBase {
       if ( $this->mConf->lateCategoryFiltering() ) {
         if ( $targetTitle !== null ) {
           $category = WikiTooltipsCore::getFilterCategoryTitle( $this->mConf )->getText();
-          $finder = new CategoryFinder;
+          $finder = new TippingOverCategoryFinder;
           $finder->seed( Array( $targetTitle->getArticleID() ), Array( $category ) );
           if ( count( $finder->run() ) === 1 ) {
             $result->addValue( null, 

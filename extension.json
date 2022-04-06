@@ -98,7 +98,8 @@
     "TippingOverConfiguration": "includes/TippingOverConfiguration.php",
     "WikiTooltips": "includes/WikiTooltips.php",
     "WikiTooltipsCore": "includes/WikiTooltipsCore.php",
-    "ApiQueryTooltip": "includes/ApiQueryTooltip.php"
+    "ApiQueryTooltip": "includes/ApiQueryTooltip.php",
+    "TippingOverCategoryFinder": "includes/TippingOverCategoryFinder.php"
   },
   "manifest_version": 1
 }
