@@ -1,6 +1,6 @@
 <?php
 
-use MediaWiki\Page\WikiPageFactory;
+use MediaWiki\MediaWikiServices;
 
 /**
  * This static class contains tooltip-related functions needed both by index.php and api.php calls.
@@ -50,7 +50,7 @@ class WikiTooltipsCore {
    */
   public static function followRedirect( $title ) {
     if ( $title !== null && $title->getNamespace() !== NS_MEDIA && $title->getNamespace() > -1 ) {
-      $page = WikiPageFactory::newFromTitle( $title );
+      $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
       $target = $page->getRedirectTarget();
       if ( $target !== null ) {
         return $target;
