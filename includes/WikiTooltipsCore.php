@@ -49,7 +49,7 @@ class WikiTooltipsCore {
    * @return Title The original title if it isn't a redirect or the title of the redirect target if it is.
    */
   public static function followRedirect( $title ) {
-    if ( $title !== null && $title->getNamespace() !== NS_MEDIA && $title->getNamespace() > -1 ) {
+    if ( $title !== null && $title->canExist() ) {
       $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
       $target = $page->getRedirectTarget();
       if ( $target !== null ) {
