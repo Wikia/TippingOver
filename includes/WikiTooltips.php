@@ -1,7 +1,6 @@
 <?php
 
 use MediaWiki\Linker\LinkTarget;
-use MediaWiki\MediaWikiServices;
 
 /**
  * This static class handles most basic tooltip functions that occur during a page load through index.php.
@@ -454,40 +453,14 @@ class WikiTooltips {
   }
 
   /**
-   * Return iw:ns:Title for a LinkTarget. Copied from Title::prefix.
-   * @param LinkTarget $target
-   * @return string
-   */
-  private static function getPrefixedLinkTarget( LinkTarget $target ) {
-    $p = '';
-    if ( $target->isExternal() ) {
-      $p = $target->getInterwiki() . ':';
-    }
-
-    $namespace = $target->getNamespace();
-    if ( $namespace != NS_MAIN ) {
-      $lang = MediaWikiServices::getInstance()->getContentLanguage();
-      $nsText = $lang->getNsText( $namespace );
-
-      if ( $nsText === false ) {
-        // See T165149. Awkward, but better than erroneously linking to the main namespace.
-        $nsText = $lang->getNsText( NS_SPECIAL ) . ":Badtitle/NS{$namespace}";
-      }
-
-      $p .= $nsText . ':';
-    }
-    return $p . $target->getText();
-  }
-
-  /**
    * This function performs the server-side checks enabled by the current configuration to determine if a given link
    * does not have a tooltip and returns null if not. Otherwise, it returns an array of information needed for both
    * displaying the tooltip client-side and running any further checks there to see if a tooltip is available for the
    * link.
-   * @param LinkTarget $target The target page of the link or tooltip span.
+   * @param Title $target The target page of the link or tooltip span.
    * @return Array null if the link should not have a tooltip, or an array of information if it might get one.
    */
-  private static function runEarlyTooltipChecks( LinkTarget $target ) {
+  private static function runEarlyTooltipChecks( Title $target ) {
     if ( self::$mConf->namespaceWithTooltips( $target->getNamespace() ) ) {
       $setupInfo = Array( 'canLateFollow' => true );
       $setupInfo['directTargetTitle'] = $directTarget = $target;
@@ -506,9 +479,9 @@ class WikiTooltips {
           // For #ask and #show in SMW, the parse can't come through the message cache, so we do this reroute
           // See https://github.com/SemanticMediaWiki/SemanticMediaWiki/issues/1181
           $tooltipTitleWikitext = wfMessage( 'to-tooltip-page-name' )->inContentLanguage()
-                                                                     ->params( self::getPrefixedLinkTarget( $target ),
+                                                                     ->params( $target->getPrefixedText(),
                                                                                $target->getFragment(),
-                                                                               self::getPrefixedLinkTarget( $directTarget ),
+                                                                               $directTarget->getPrefixedText(),
                                                                                $directTarget->getFragment()
                                                                              )
                                                                      ->plain();
@@ -605,11 +578,11 @@ class WikiTooltips {
    * does not have a tooltip and returns false if not. Otherwise, this adds appropriate HTML attributes as name/value
    * pairs to the second given array, which should either be an empty array or an array of existing HTML attributes that
    * should be added to the final tag, and also returns true.
-   * @param LinkTarget $target The target page of the link or tooltip span.
+   * @param Title|null $target The target page of the link or tooltip span.
    * @param Array $attribs An array of HTML attributes with name/value pairs to add tooltip-related attributes to.
    * @return bool True if there is a tooltip and tooltip attribtues have been added.
    */
-  private static function maybeAttachTooltip( $target, &$attribs ) {
+  private static function maybeAttachTooltip( ?Title $target, &$attribs ) {
     if ( $target !== null ) {
       $setupInfo = self::runEarlyTooltipChecks( $target );
 
@@ -644,6 +617,7 @@ class WikiTooltips {
         self::performDelayedInitialization();
       }
 
+      $target = Title::newFromLinkTarget( $target );
       self::maybeAttachTooltip( $target, $attribs );
 
       return true;
