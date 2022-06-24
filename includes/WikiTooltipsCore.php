@@ -1,6 +1,5 @@
 <?php
 
-use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 
 /**
@@ -46,16 +45,11 @@ class WikiTooltipsCore {
   /**
    * This function will check if the given page title references a redirect and returns the redirect target title if
    * it does; otherwise, it returns the title given.
-   * @param LinkTarget|null $title The title to follow any redirect on.
-   * @return LinkTarget|null The original title if it isn't a redirect or the title of the redirect target if it is.
+   * @param Title|null $title The title to follow any redirect on.
+   * @return Title|null The original title if it isn't a redirect or the title of the redirect target if it is.
    */
-  public static function followRedirect( ?LinkTarget $title ): ?LinkTarget {
-    if ( $title === null ) {
-	  return null;
-    }
-
-    $title = Title::newFromLinkTarget( $title );
-    if ( $title->canExist() ) {
+  public static function followRedirect( ?Title $title ): ?Title {
+    if ( $title && $title->canExist() ) {
       $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
       $target = $page->getRedirectTarget();
       if ( $target !== null ) {
