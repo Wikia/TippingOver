@@ -32,7 +32,7 @@ class APIQueryTooltip extends APIBase {
       $this->mParserOptions->setWrapOutputClass( null );
     }
   }
-  
+
   /**
    * Gets the options requested in the options param into an array form, or errors out the request if the options
    * are invalid.
@@ -64,7 +64,7 @@ class APIQueryTooltip extends APIBase {
 
     return $options;
   }
-  
+
   /**
    * This function gets the tooltip title in string form. If it's available directly from the tooltip param supplied
    * in the request, it returns that. Otherwise, it will use MediaWiki:To-tooltip-page-title to try to transform
@@ -104,7 +104,7 @@ class APIQueryTooltip extends APIBase {
       }
     }
   }
-  
+
   /**
    * Runs the parser to get the fully parsed content for a tooltip to return.
    * @param Title $tooltipTitle The title of the tooltip to get content from.
@@ -114,7 +114,7 @@ class APIQueryTooltip extends APIBase {
   private function parseTooltip( $tooltipTitle, $targetTitle ) {
     return $this->parse( WikiTooltipsCore::getTooltipWikiText( $tooltipTitle ), $targetTitle );
   }
-  
+
   /**
    * Parses the supplied wikitext.
    * @global Parser $wgParser The MediaWiki parser.
@@ -124,18 +124,18 @@ class APIQueryTooltip extends APIBase {
    */
   private function parse( $wikitext, $title ) {
     global $wgParser;
-    
+
     $output = $wgParser->parse( $wikitext, $title, $this->mParserOptions );
     return $output->getText();
   }
-  
+
   /**
    * Processes the API requests and adds the appropriate results.
    * @param Array $options The array of options from the getOptions function.
    */
   private function addResults( $options ) {
     $result = $this->getResult();
-    
+
     $targetTitle = Title::newFromText( $this->params['target'] );
     if ( $options['cat'] ) {
       if ( $this->mConf->lateCategoryFiltering() ) {
@@ -144,13 +144,13 @@ class APIQueryTooltip extends APIBase {
           $finder = new TippingOverCategoryFinder;
           $finder->seed( Array( $targetTitle->getArticleID() ), Array( $category ) );
           if ( count( $finder->run() ) === 1 ) {
-            $result->addValue( null, 
-                               'passesCategoryFilter', 
+            $result->addValue( null,
+                               'passesCategoryFilter',
                                ($this->mConf->enablingCategory() !== null) ? 'true' : 'false'
                              );
           } else {
-            $result->addValue( null, 
-                               'passesCategoryFilter', 
+            $result->addValue( null,
+                               'passesCategoryFilter',
                                ($this->mConf->enablingCategory() === null) ? 'true' : 'false'
                              );
           }
@@ -161,7 +161,7 @@ class APIQueryTooltip extends APIBase {
         $result->addValue( null, 'passesCategoryFilter', 'true' );
       }
     }
-    
+
     $tooltipTitleText = $this->getTooltipTitleText( $options );
     if ( $tooltipTitleText !== null && trim( $tooltipTitleText ) !== '' ) {
       $tooltipTitle = Title::newFromText( $tooltipTitleText );
@@ -191,7 +191,7 @@ class APIQueryTooltip extends APIBase {
       $result->addValue( null, 'tooltipTitle', '' );
     }
   }
-  
+
   /**
    * Executes the API request for given tooltip content.
    */
@@ -199,16 +199,16 @@ class APIQueryTooltip extends APIBase {
     $this->mConf = new TippingOverConfiguration();
     $this->params = $this->extractRequestParams();
     $this->requireAtLeastOneParameter( $this->params, 'target', 'tooltip' );
-    
+
     $this->initializeParserOptions();
     WikiTooltipsCore::flagTooltipAttachmentUnsafe();
-    
+
     $this->addResults( $this->getOptions() );
-    
+
     $this->getMain()->setCacheMaxAge( 300 );
     $this->getMain()->setCacheMode( 'public' );
   }
-  
+
   /**
    * Returns the names and metadata of the allowed parameters.
    * @return Array Returns the names and metadata of the allowed parameters.
@@ -219,7 +219,7 @@ class APIQueryTooltip extends APIBase {
                   'options' => Array( ApiBase::PARAM_TYPE => 'string', ApiBase::PARAM_REQUIRED => true ),
                 );
   }
-  
+
   /**
    * Returns a version string. Not consistent with other API modules since I'm not yet using SVN.
    * @return string A version string.

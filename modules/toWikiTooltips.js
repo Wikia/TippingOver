@@ -23,15 +23,15 @@ var toWikiTooltips = toWikiTooltips || {
   pageY : 0,
 
   /**
-   * Converts all nonnumeric, nonalphabetic character or any character (actually, byte) outside the ASCII set to a hex 
-   * representation beginning with an underscore and ending with a dash. Used primarily for generating unique element 
-   * ids from page titles. This must produce results consistent with WikiTooltips->encodeAllSpecials() in 
+   * Converts all nonnumeric, nonalphabetic character or any character (actually, byte) outside the ASCII set to a hex
+   * representation beginning with an underscore and ending with a dash. Used primarily for generating unique element
+   * ids from page titles. This must produce results consistent with WikiTooltips->encodeAllSpecials() in
    * wikiTooltips.php.
    * @param {String} unencoded The unencoded string.
    * @returns {String} The encoded string.
    */
   encodeAllSpecial : function( unencoded ) {
-    var encoded = ""; 
+    var encoded = "";
     var c;
     var safeChars = /[0-9A-Za-z]/;
     for( var i = 0; i < unencoded.length; i++ ) {
@@ -52,7 +52,7 @@ var toWikiTooltips = toWikiTooltips || {
    */
   beginInitialize : function() {
     toWikiTooltips.config = mw.config.get( 'wgTippingOver' );
-    
+
     if ( toWikiTooltips.loadingTooltip !== null && toWikiTooltips.config.preloadLoadingTooltip ) {
       var preloadBox = $( '<div />' );
       preloadBox.css( 'display', 'none' );
@@ -69,14 +69,14 @@ var toWikiTooltips = toWikiTooltips || {
       toWikiTooltips.finishInitialize( );
     }
   },
-  
+
   /**
    * Performs additional initialization tasks, done after preloading the loading tooltip image if there is one or
    * just after beginInitialize() is finished.
    */
   finishInitialize : function() {
     $( window ).resize( toWikiTooltips.resizeVisibleTooltip );
-    
+
     $( '.to_hasTooltip' ).each( function() {
       toWikiTooltips.createTooltipAndPreloadElement( $( this ) );
       $( this )
@@ -85,7 +85,7 @@ var toWikiTooltips = toWikiTooltips || {
         .on( 'mouseout', toWikiTooltips.hideTooltip );
     } );
   },
-  
+
   /**
    * Creates a tooltip and possibly a preload box for a given link according to the appropriate data attributes set
    * on the link.
@@ -93,7 +93,7 @@ var toWikiTooltips = toWikiTooltips || {
    */
   createTooltipAndPreloadElement : function( link ) {
     var linkData = toWikiTooltips.expandDataAttributes( link );
-    
+
     if ( $( '#' + toWikiTooltips.tooltipClassPrefix + linkData.toId ).length === 0 ) {
       var tooltipBox = $( '<div />');
       tooltipBox.addClass( 'to_tooltip' );
@@ -120,7 +120,7 @@ var toWikiTooltips = toWikiTooltips || {
       if ( "toEmptyPageName" in linkData ) {
         tooltipData.toEmptyPageName = linkData.toEmptyPageName;
       }
-      
+
       $( 'body' ).append( tooltipBox );
 
       if ( !("toIsImage" in linkData) || linkData.toIsImage ) {
@@ -130,12 +130,12 @@ var toWikiTooltips = toWikiTooltips || {
         $( 'body' ).append( preloadBox );
 
         if ( tooltipData.toMissingPage ) {
-          toWikiTooltips.beginUpdateTooltip( linkData.toId, 
+          toWikiTooltips.beginUpdateTooltip( linkData.toId,
                                              toWikiTooltips.config.missingPageTooltip,
                                              !toWikiTooltips.config.preloadMissingPageTooltip
                                            );
         } else if ( tooltipData.toEmptyPageName ) {
-          toWikiTooltips.beginUpdateTooltip( linkData.toId, 
+          toWikiTooltips.beginUpdateTooltip( linkData.toId,
                                              toWikiTooltips.config.emptyPageNameTooltip,
                                              !toWikiTooltips.config.preloadEmptyPageNameTooltip
                                            );
@@ -144,7 +144,7 @@ var toWikiTooltips = toWikiTooltips || {
       }
     }
   },
-  
+
   /**
    * Expands the new abbreviated data attributes added in 0.6.6 into the conventional verbose versions and adds them
    * to the supplied link, returning the updated link data.
@@ -153,7 +153,7 @@ var toWikiTooltips = toWikiTooltips || {
    */
   expandDataAttributes : function( link ) {
     linkData = link.data();
-    
+
     if ( "toTitles" in linkData ) {
       var titles = linkData.toTitles.split( '|' );
       if ( titles.length === 3 ) {
@@ -168,7 +168,7 @@ var toWikiTooltips = toWikiTooltips || {
         }
       }
     }
-    
+
     if ( "toFlags" in linkData ) {
       if ( linkData.toFlags.indexOf( 'f' ) > -1 ) {
         link.data( 'toCanLateFollow', false );
@@ -195,10 +195,10 @@ var toWikiTooltips = toWikiTooltips || {
         link.data( 'toEmptyPageName', true );
       }
     }
-    
+
     return link.data();
   },
-  
+
   /**
    * Removes a tooltip and preload box along with the events for the given link.
    * @param {Element} link The link to remove events from.
@@ -207,13 +207,13 @@ var toWikiTooltips = toWikiTooltips || {
   removeTooltip : function( link, id ) {
     $( '#' + toWikiTooltips.preloadClassPrefix + id ).remove();
     $( '#' + toWikiTooltips.tooltipClassPrefix + id ).remove();
-    
+
     $( link )
       .off( 'mouseover', toWikiTooltips.showTooltip )
       .off( 'mousemove', toWikiTooltips.moveTooltip )
       .off( 'mouseout', toWikiTooltips.hideTooltip );
   },
-  
+
   /**
    * Identifies if the given data indicates there is any tooltip to show.
    * @param {object} jsonData Data returned from an ApiQueryTooltip call.
@@ -232,7 +232,7 @@ var toWikiTooltips = toWikiTooltips || {
       return true;
     }
   },
-  
+
   /**
    * Perform appropriate replacements for placeholders in the given HTML:
    *   $1: the page title sans anchor of the link target after potentially following any redirect
@@ -248,7 +248,7 @@ var toWikiTooltips = toWikiTooltips || {
       var directTargetTitle = tooltipData.toDirectTargetTitle.split( '#' );
       html = html.replace( /\$3/g, directTargetTitle[0] );
       if ( directTargetTitle.length > 1 ) {
-        html = html.replace( /\$4/g, directTargetTitle[1] );  
+        html = html.replace( /\$4/g, directTargetTitle[1] );
       } else {
         html = html.replace( /\$4/g, '' );
       }
@@ -257,7 +257,7 @@ var toWikiTooltips = toWikiTooltips || {
       var targetTitle = tooltipData.toTargetTitle.split( '#' );
       html = html.replace( /\$[13]/g, targetTitle[0] );
       if ( targetTitle.length > 1 ) {
-        html = html.replace( /\$[24]/g, targetTitle[1] );  
+        html = html.replace( /\$[24]/g, targetTitle[1] );
       } else {
         html = html.replace( /\$[24]/g, '' );
       }
@@ -266,7 +266,7 @@ var toWikiTooltips = toWikiTooltips || {
     }
     return html;
   },
-  
+
   /**
    * After all needed information has been pulled from the server for a valid tooltip, this function will begin the
    * process of updating the tooltip as needed, removing the preload box for any tooltip that won't be using it.
@@ -278,24 +278,24 @@ var toWikiTooltips = toWikiTooltips || {
    */
   beginUpdateTooltip : function( id, html, removePreload ) {
     var preloadBox = $( '#' + toWikiTooltips.preloadClassPrefix + id );
-    
+
     if ( removePreload ) {
       preloadBox.remove();
       preloadBox = null;
     }
-    
+
     if ( preloadBox !== null && preloadBox.length === 1 ) {
       preloadBox.html( html );
-      preloadBox.find( 'img' ).one( 'load', 
-                                    { id : id, html: html }, 
-                                    function( event ) { 
+      preloadBox.find( 'img' ).one( 'load',
+                                    { id : id, html: html },
+                                    function( event ) {
                                       toWikiTooltips.finishUpdateTooltip( event.data.id, event.data.html );
                                     }
-      ).one( 'error', 
-             { id : id }, 
+      ).one( 'error',
+             { id : id },
              function( event ) {
                toWikiTooltips.resetTooltip( event.data.id );
-             } 
+             }
       ).each( function() {
         if ( this.complete ) {
           $( this ).trigger( 'load', { id : id, html: html } );
@@ -311,7 +311,7 @@ var toWikiTooltips = toWikiTooltips || {
       toWikiTooltips.finishUpdateTooltip( id, html );
     }
   },
-  
+
   /**
    * Finishes tooltip update tasks after any needed requests, and after a preload if that should happen. Shows the
    * tooltip if it should be shown when loaded.
@@ -321,7 +321,7 @@ var toWikiTooltips = toWikiTooltips || {
   finishUpdateTooltip : function( id, html ) {
     var tooltipBox = $( '#' + toWikiTooltips.tooltipClassPrefix + id );
     var tooltipData = tooltipBox.data( );
-    
+
     tooltipBox.html( html );
     tooltipData.toLoaded = true;
     tooltipData.toLoading = false;
@@ -332,7 +332,7 @@ var toWikiTooltips = toWikiTooltips || {
       toWikiTooltips.updateTooltipVisibility();
     }
   },
-  
+
   /**
    * Begins a AJAX request to the tooltip API module implemented by ApiQueryTooltip.
    * @param {string} id The unique id fragment for the tooltip box.
@@ -342,8 +342,8 @@ var toWikiTooltips = toWikiTooltips || {
    * @param {function} success A function to call on success.
    */
   beginRequest : function( id, targetTitleText, tooltipTitleText, options, success ) {
-    var data = { action: 'tooltip', 
-                 format: 'json', 
+    var data = { action: 'tooltip',
+                 format: 'json',
                  target: targetTitleText,
                  options: options.join( '|' )
               };
@@ -360,7 +360,7 @@ var toWikiTooltips = toWikiTooltips || {
       error: function() { toWikiTooltips.resetTooltip( id ); }
     } );
   },
-  
+
   /**
    * Sends a request before showing the loading tooltip to gain enough information to determine if the loading tooltip
    * should be displayed. Only happens in certain configurations.
@@ -385,18 +385,18 @@ var toWikiTooltips = toWikiTooltips || {
       options.push( 'title' );
       options.push( 'image' );
     }
-    toWikiTooltips.beginRequest( id, 
+    toWikiTooltips.beginRequest( id,
                                  targetTitleText,
                                  tooltipTitleText,
                                  options,
-                                 function( jsonData ) { 
-                                   toWikiTooltips.finishCheck( link, 
-                                                               id, 
-                                                               targetTitleText, 
-                                                               canFollow, 
-                                                               tooltipTitleText, 
-                                                               jsonData 
-                                                             ); 
+                                 function( jsonData ) {
+                                   toWikiTooltips.finishCheck( link,
+                                                               id,
+                                                               targetTitleText,
+                                                               canFollow,
+                                                               tooltipTitleText,
+                                                               jsonData
+                                                             );
                                  }
     );
   },
@@ -414,7 +414,7 @@ var toWikiTooltips = toWikiTooltips || {
   finishCheck : function( link, id, targetTitleText, canFollow, tooltipTitleText, jsonData ) {
     var tooltipBox = $( '#' + toWikiTooltips.tooltipClassPrefix + id );
     var tooltipData = tooltipBox.data( );
-    
+
     if ( !toWikiTooltips.config.doLateCategoryFiltering || jsonData.passesCategoryFilter !== 'false' ) {
       if ( toWikiTooltips.config.doLatePageTitleParse && 'tooltipTitle' in jsonData ) {
         if ( jsonData.tooltipTitle.trim() !== '' ) {
@@ -424,7 +424,7 @@ var toWikiTooltips = toWikiTooltips || {
           tooltipData.toEmptyPageName = true;
         }
       }
-      
+
       if ( toWikiTooltips.config.doLatePageTitleParse && 'isImage' in jsonData ) {
         tooltipData.toIsImage = ( jsonData.isImage !== 'false' );
       }
@@ -478,7 +478,7 @@ var toWikiTooltips = toWikiTooltips || {
       options.push( 'title' );
       options.push( 'image' );
     }
-    toWikiTooltips.beginRequest( id, 
+    toWikiTooltips.beginRequest( id,
                                  targetTitleText,
                                  tooltipTitleText,
                                  options,
@@ -495,23 +495,23 @@ var toWikiTooltips = toWikiTooltips || {
   finishLoadTooltip : function( link, id, jsonData ) {
     var tooltipBox = $( '#' + toWikiTooltips.tooltipClassPrefix + id );
     var tooltipData = tooltipBox.data( );
-    
+
     if ( !toWikiTooltips.config.doLateCategoryFiltering || jsonData.passesCategoryFilter !== 'false' ) {
       if ( toWikiTooltips.config.doLatePageTitleParse && 'tooltipTitle' in jsonData ) {
         tooltipData.toTooltipTitle = jsonData.tooltipTitle;
         tooltipData.toEmptyPageName = ( jsonData.tooltipTitle.trim() === '' );
       }
-      
+
       if ( toWikiTooltips.config.doLatePageTitleParse && 'isImage' in jsonData ) {
         tooltipData.toIsImage = ( jsonData.isImage !== 'false' );
       } else {
         tooltipData.toIsImage = $( link ).data( 'toIsImage' );
       }
-      
+
       if ( toWikiTooltips.config.doLateExistsCheck && 'exists' in jsonData ) {
         tooltipData.toMissingPage = ( jsonData.exists === 'false' );
       }
-      
+
       if ( !tooltipData.toMissingPage && !tooltipData.toEmptyPageName ) {
         toWikiTooltips.beginUpdateTooltip( id, jsonData.text['*'], !tooltipData.toIsImage );
       } else if ( tooltipData.toMissingPage && toWikiTooltips.config.missingPageTooltip !== null ) {
@@ -527,7 +527,7 @@ var toWikiTooltips = toWikiTooltips || {
       toWikiTooltips.removeTooltip( link, id );
     }
   },
-  
+
   /**
    * Sets the content of the indicated tooltip box to that of the loading tooltip and shows it.
    * @param {Element} tooltipBox The tooltip div.
@@ -567,30 +567,30 @@ var toWikiTooltips = toWikiTooltips || {
         if ( toWikiTooltips.config.loadingTooltip !== null ) {
           if ( toWikiTooltips.config.useTwoRequestProcess ) {
             tooltipData.toChecking = true;
-            toWikiTooltips.beginCheck( this, 
-                                       linkData.toId, 
-                                       linkData.toTargetTitle, 
-                                       linkData.toCanLateFollow, 
-                                       linkData.toTooltipTitle 
+            toWikiTooltips.beginCheck( this,
+                                       linkData.toId,
+                                       linkData.toTargetTitle,
+                                       linkData.toCanLateFollow,
+                                       linkData.toTooltipTitle
                                      );
           } else {
             tooltipData.toLoading = true;
             toWikiTooltips.setToLoadingTooltip( tooltipBox, linkData.toId );
-            toWikiTooltips.beginLoadTooltip( this, 
-                                             linkData.toId, 
-                                             linkData.toTargetTitle, 
-                                             linkData.toCanLateFollow, 
-                                             linkData.toTooltipTitle 
+            toWikiTooltips.beginLoadTooltip( this,
+                                             linkData.toId,
+                                             linkData.toTargetTitle,
+                                             linkData.toCanLateFollow,
+                                             linkData.toTooltipTitle
                                            );
           }
         } else {
           tooltipData.toLoading = true;
           tooltipData.toShowWhenLoaded = true;
-          toWikiTooltips.beginLoadTooltip( this, 
-                                           linkData.toId, 
-                                           linkData.toTargetTitle, 
-                                           linkData.toCanLateFollow, 
-                                           linkData.toTooltipTitle 
+          toWikiTooltips.beginLoadTooltip( this,
+                                           linkData.toId,
+                                           linkData.toTargetTitle,
+                                           linkData.toCanLateFollow,
+                                           linkData.toTooltipTitle
                                          );
         }
       }
@@ -617,7 +617,7 @@ var toWikiTooltips = toWikiTooltips || {
 
   /**
    * Event handler for the mousemove events on tooltips.
-   * @param {object} event The event object, containing the unique id fragment 
+   * @param {object} event The event object, containing the unique id fragment
    */
   moveTooltip : function( event ) {
     toWikiTooltips.hovered = event.target;
@@ -662,13 +662,13 @@ var toWikiTooltips = toWikiTooltips || {
         if ( ( toWikiTooltips.pageY - hoveredRects[i].top - scrollY ) >= 0 &&
              ( toWikiTooltips.pageY - hoveredRects[i].bottom - scrollY ) <= 0 &&
              ( toWikiTooltips.pageX - hoveredRects[i].left - scrollX ) >= 0 &&
-             ( toWikiTooltips.pageX - hoveredRects[i].right - scrollX ) <= 0 
+             ( toWikiTooltips.pageX - hoveredRects[i].right - scrollX ) <= 0
            ) {
           hoveredRect = hoveredRects[i];
         }
       }
       if ( hoveredRect !== null ) {
-        hoveredY = ( toWikiTooltips.pageY - hoveredRect.top - scrollY ) / 
+        hoveredY = ( toWikiTooltips.pageY - hoveredRect.top - scrollY ) /
                    ( hoveredRect.bottom - hoveredRect.top );
         hoveredY = Math.min( 1.0, Math.max( 0.0, ( hoveredY * 1.5 ) - 0.25 ) );
       } else {
@@ -690,7 +690,7 @@ var toWikiTooltips = toWikiTooltips || {
       tooltip.css( { 'top' : tooltipTop, 'bottom' : 'auto' } );
     }
   },
-  
+
   /**
    * Performs resizing of the currently visible tooltip if it is an image tooltip.
    */
@@ -699,7 +699,7 @@ var toWikiTooltips = toWikiTooltips || {
       toWikiTooltips.resizeTooltip( toWikiTooltips.visibleTooltipId );
     }
   },
-  
+
   /**
    * Performs resizing of single-image tooltips.
    * @param {string} id The unique id fragment for the tooltip box.
@@ -707,7 +707,7 @@ var toWikiTooltips = toWikiTooltips || {
   resizeTooltip : function( id ) {
     toWikiTooltips.resizeTooltipBox( $( '#' + toWikiTooltips.tooltipClassPrefix + id ) );
   },
-  
+
   /**
    * Performs resizing of single-image tooltips.
    * @param {jQuery} tooltipBox The box containing the tooltip.
@@ -734,14 +734,14 @@ var toWikiTooltips = toWikiTooltips || {
     var linkData = $( this ).data( );
     var tooltipBox = $( '#' + toWikiTooltips.tooltipClassPrefix + linkData.toId );
     var tooltipData = tooltipBox.data( );
-    
+
     tooltipData.toShowWhenLoaded = false;
     if ( toWikiTooltips.visibleTooltipId === linkData.toId ) {
       toWikiTooltips.visibleTooltipId = null;
     }
     toWikiTooltips.updateTooltipVisibility();
   },
-  
+
   /**
    * Loops through all tooltips, hiding all but the one that is supposed to be visible, and shows that one if it is
    * not already visible.
@@ -749,7 +749,7 @@ var toWikiTooltips = toWikiTooltips || {
   updateTooltipVisibility : function( ) {
     $( '.to_tooltip' ).each( function() {
       if ( toWikiTooltips.visibleTooltipId !== null &&
-           $( this ).attr( 'id' ) === ( toWikiTooltips.tooltipClassPrefix + toWikiTooltips.visibleTooltipId ) 
+           $( this ).attr( 'id' ) === ( toWikiTooltips.tooltipClassPrefix + toWikiTooltips.visibleTooltipId )
          ) {
         toWikiTooltips.resizeTooltipBox( $( this ) );
         $( this ).show();
