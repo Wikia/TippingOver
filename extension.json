@@ -92,7 +92,10 @@
     "TippingOver": "i18n"
   },
   "APIModules" : {
-    "tooltip" : "ApiQueryTooltip"
+    "tooltip" : {
+		"class": "ApiQueryTooltip",
+		"services": ["PageStore", "DBLoadBalancer"]
+	}
   },
   "AutoloadClasses": {
     "TippingOverConfiguration": "includes/TippingOverConfiguration.php",
