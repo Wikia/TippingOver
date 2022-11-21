@@ -1,5 +1,8 @@
 <?php
 
+use MediaWiki\Page\PageStore;
+use Wikimedia\Rdbms\ILoadBalancer;
+
 /**
  * This is a simple top-level API module that provides some shortcut API queries that allow certain backend calls to
  * be performed by TippingOver in a single request, rather than the two that would be needed in some cases by using
@@ -11,6 +14,11 @@
  */
 
 class APIQueryTooltip extends APIBase {
+  /** @var PageStore */
+  private $pageStore;
+  /** @var ILoadBalancer */
+  private $dbLoadBalancer;
+
   /**
    * Holds the parser options
    * @var ParserOptions
@@ -24,6 +32,23 @@ class APIQueryTooltip extends APIBase {
   private $mConf = null;
 
   /**
+   * API request parameters.
+   * @var array $params
+   */
+  private $params;
+
+  public function __construct(
+	  ApiMain $mainModule,
+	  $moduleName,
+	  PageStore $pageStore,
+	  ILoadBalancer $dbLoadBalancer
+  ) {
+	  parent::__construct( $mainModule, $moduleName );
+	  $this->pageStore = $pageStore;
+	  $this->dbLoadBalancer = $dbLoadBalancer;
+  }
+
+	/**
    * Initializes a ParserOptions instance.
    */
   private function initializeParserOptions() {
@@ -205,8 +230,72 @@ class APIQueryTooltip extends APIBase {
 
     $this->addResults( $this->getOptions() );
 
-    $this->getMain()->setCacheMaxAge( 300 );
-    $this->getMain()->setCacheMode( 'public' );
+    // Cache tooltips on the CDN for 5 minutes, with a background revalidation grace time of 1 minute (CATS-3586).
+    // Note that the 'public' cache mode is not any better than 'anon-public-user-private' here because the responses
+    // will still Vary on Cookie, effectively preventing the reuse of cached responses between logged-in users,
+    // and potentially creating a high amount of object variants on the CDN if a response is accessed by many
+    // distinct users. This is not desirable and may cause performance issues, so fall back to a private cache for
+    // logged-in users.
+    $this->getMain()->setCacheControl( [
+		'max-age' => 300,
+		's-maxage' => 300,
+		'stale-while-revalidate' => 60,
+	] );
+    $this->getMain()->setCacheMode( 'anon-public-user-private' );
+  }
+
+  /** RFC 7232 conditional revalidation for tooltips based on tooltip page modification times */
+  public function getConditionalRequestData( $condition ) {
+	  // Compute the MediaWiki timestamp of the RFC 7232 Last-Modified time for this tooltip.
+	  // This should effectively be the maximum of the tooltip page touched time and the target page touched time.
+	  // If category filtering is used for this tooltip, any changes to the target page's category membership
+	  // should implicitly bump its touched time as well, so there should be no specific handling required for that.
+	  if ( $condition === 'last-modified' ) {
+		  $this->params = $this->extractRequestParams();
+		  $options = $this->getOptions();
+
+		  $titles = [];
+
+		  $target = isset( $this->params['target'] ) ? Title::newFromText( $this->params['target'] ) : null;
+		  if ( $target !== null ) {
+			  $titles[$target->getNamespace()][] = $target->getDBkey();
+		  }
+
+		  $tooltipTitleText = $this->getTooltipTitleText( $options );
+		  $tooltipTitle = $tooltipTitleText ? Title::newFromText( $tooltipTitleText ) : null;
+		  if ( $tooltipTitle !== null ) {
+			  $titles[$tooltipTitle->getNamespace()][] = $tooltipTitle->getDBkey();
+		  }
+
+		  if ( count( $titles ) > 0 ) {
+			  $dbr = $this->dbLoadBalancer->getConnectionRef( DB_REPLICA );
+			  $conds = [];
+
+			  foreach ( $titles as $namespace => $dbKeys ) {
+				  $conds[] = $dbr->makeList(
+					  [ 'page_namespace' => $namespace, 'page_title' => $dbKeys ],
+					  $dbr::LIST_AND
+				  );
+			  }
+
+			  $res = $this->pageStore->newSelectQueryBuilder()
+				  ->where( $dbr->makeList( $conds, $dbr::LIST_OR ) )
+				  ->caller( __METHOD__ )
+				  ->fetchPageRecords();
+
+			  $touched = null;
+			  /** @var \MediaWiki\Page\PageRecord $pageRecord */
+			  foreach ( $res as $pageRecord ) {
+				  if ( $touched === null || $pageRecord->getTouched() > $touched ) {
+					  $touched = $pageRecord->getTouched();
+				  }
+			  }
+
+			  return $touched;
+		  }
+	  }
+
+	  return null;
   }
 
   /**

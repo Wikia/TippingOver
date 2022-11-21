@@ -342,16 +342,18 @@ var toWikiTooltips = toWikiTooltips || {
    * @param {function} success A function to call on success.
    */
   beginRequest : function( id, targetTitleText, tooltipTitleText, options, success ) {
-    var data = { action: 'tooltip',
-                 format: 'json',
-                 target: targetTitleText,
-                 options: options.join( '|' )
-              };
+    var data = {
+        action: 'tooltip',
+        format: 'json',
+        target: targetTitleText,
+        options: options.join( '|' ),
+    };
+
     if ( tooltipTitleText !== null ) {
       data['tooltip'] = tooltipTitleText;
     }
     $.ajax( {
-      type : 'POST',
+      type : 'GET',
       url : mw.util.wikiScript( 'api' ),
       data : data,
       dataType : 'json',
