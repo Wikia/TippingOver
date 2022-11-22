@@ -49,7 +49,9 @@ class WikiTooltipsCore {
    * @return Title|null The original title if it isn't a redirect or the title of the redirect target if it is.
    */
   public static function followRedirect( ?Title $title ): ?Title {
-    if ( $title && $title->canExist() ) {
+	// Optimization: Use isRedirect() so that we only create a full WikiPage for pages known to be redirects.
+    // Loading a WikiPage always triggers a DB query, making it expensive.
+    if ( $title && $title->isRedirect() ) {
       $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
       $target = $page->getRedirectTarget();
       if ( $target !== null ) {
