@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageStore;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
@@ -144,9 +145,7 @@ class APIQueryTooltip extends APIBase {
    * @return string The wikitext parsed to HTML.
    */
   private function parse( $wikitext, $title ) {
-    global $wgParser;
-
-    $output = $wgParser->parse( $wikitext, $title, $this->mParserOptions );
+    $output = MediaWikiServices::getInstance()->getParser()->parse( $wikitext, $title, $this->mParserOptions );
     return $output->getText();
   }
 

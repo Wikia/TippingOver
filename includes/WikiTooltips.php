@@ -334,22 +334,11 @@ class WikiTooltips {
   }
 
   /**
-   * Gets a Parser and ParserOptions instance by cloning the main parser, using the same approach as MediaWiki's
-   * internal messages API.
-   * @global Parser $wgParser The main parser object.
-   * @global Array $wgParserConf The main parser configuration.
+   * Gets a Parser
    */
   private static function initializeParser() {
-    global $wgParser, $wgParserConf;
-
-    if ( self::$mParser === null && isset( $wgParser ) ) {
-      $wgParser->firstCallInit();
-      $class = $wgParserConf['class'];
-      if ( $class == 'ParserDiffTest' ) {
-        self::$mParser = new $class( $wgParserConf );
-      } else {
-        self::$mParser = clone $wgParser;
-      }
+    if ( self::$mParser === null ) {
+		self::$mParser = MediaWikiServices::getInstance()->getParser();
     }
   }
 
