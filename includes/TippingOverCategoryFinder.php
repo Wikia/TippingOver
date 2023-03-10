@@ -4,6 +4,7 @@
  * For backwards compatibility it was added into TippingOver extension.
  */
 
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 
 /**
@@ -90,7 +91,7 @@ final class TippingOverCategoryFinder {
 	 * @return array Array of page_ids (those given to seed() that match the conditions)
 	 */
 	public function run() {
-		$this->dbr = wfGetDB( DB_REPLICA );
+		$this->dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		$i = 0;
 		$dig = true;

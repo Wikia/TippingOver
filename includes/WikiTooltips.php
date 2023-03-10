@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\Linker\LinkTarget;
+use MediaWiki\MediaWikiServices;
 
 /**
  * This static class handles most basic tooltip functions that occur during a page load through index.php.
@@ -211,7 +212,7 @@ class WikiTooltips {
    * @param string $title The appropriate value of page_name or cl_to for the category in the database.
    */
   private static function populateLookupFromCategory( $title ) {
-    $dbr = wfGetDB( DB_REPLICA );
+    $dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
     $result = $dbr->select( Array( 'page', 'categorylinks' ),
                             Array( 'page_id', 'page_namespace', 'page_title' ),
