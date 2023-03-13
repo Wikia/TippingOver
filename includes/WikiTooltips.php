@@ -338,7 +338,7 @@ class WikiTooltips {
    */
   private static function initializeParser() {
     if ( self::$mParser === null ) {
-		self::$mParser = MediaWikiServices::getInstance()->getParser();
+		self::$mParser = MediaWikiServices::getInstance()->getParserFactory()->create();
     }
   }
 
