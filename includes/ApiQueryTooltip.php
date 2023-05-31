@@ -1,6 +1,10 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageStore;
+use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\ParamValidator\TypeDef\IntegerDef;
+use Wikimedia\ParamValidator\TypeDef\NumericDef;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
@@ -14,11 +18,6 @@ use Wikimedia\Rdbms\ILoadBalancer;
  */
 
 class APIQueryTooltip extends APIBase {
-  /** @var PageStore */
-  private $pageStore;
-  /** @var ILoadBalancer */
-  private $dbLoadBalancer;
-
   /**
    * Holds the parser options
    * @var ParserOptions
@@ -40,12 +39,10 @@ class APIQueryTooltip extends APIBase {
   public function __construct(
 	  ApiMain $mainModule,
 	  $moduleName,
-	  PageStore $pageStore,
-	  ILoadBalancer $dbLoadBalancer
+	  private PageStore $pageStore,
+	  private ILoadBalancer $dbLoadBalancer
   ) {
 	  parent::__construct( $mainModule, $moduleName );
-	  $this->pageStore = $pageStore;
-	  $this->dbLoadBalancer = $dbLoadBalancer;
   }
 
 	/**
@@ -53,7 +50,7 @@ class APIQueryTooltip extends APIBase {
    */
   private function initializeParserOptions() {
     if ( $this->mParserOptions === null ) {
-      $this->mParserOptions = ParserOptions::newCanonical( $this->getContext() );
+      $this->mParserOptions = ParserOptions::newFromContext( $this->getContext() );
       $this->mParserOptions->setWrapOutputClass( null );
     }
   }
@@ -148,9 +145,7 @@ class APIQueryTooltip extends APIBase {
    * @return string The wikitext parsed to HTML.
    */
   private function parse( $wikitext, $title ) {
-    global $wgParser;
-
-    $output = $wgParser->parse( $wikitext, $title, $this->mParserOptions );
+    $output = MediaWikiServices::getInstance()->getParser()->parse( $wikitext, $title, $this->mParserOptions );
     return $output->getText();
   }
 
@@ -303,9 +298,9 @@ class APIQueryTooltip extends APIBase {
    * @return Array Returns the names and metadata of the allowed parameters.
    */
   public function getAllowedParams( ) {
-    return Array( 'target' => Array( ApiBase::PARAM_TYPE => 'string' ),
-                  'tooltip' => Array( ApiBase::PARAM_TYPE => 'string' ),
-                  'options' => Array( ApiBase::PARAM_TYPE => 'string', ApiBase::PARAM_REQUIRED => true ),
+    return Array( 'target' => Array( NumericDef::PARAM_MAX => 'string' ),
+                  'tooltip' => Array( ParamValidator::PARAM_TYPE => 'string' ),
+                  'options' => Array( ParamValidator::PARAM_TYPE => 'string', ParamValidator::PARAM_REQUIRED => true ),
                 );
   }
 

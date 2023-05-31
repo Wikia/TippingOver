@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\Linker\LinkTarget;
+use MediaWiki\MediaWikiServices;
 
 /**
  * This static class handles most basic tooltip functions that occur during a page load through index.php.
@@ -211,7 +212,7 @@ class WikiTooltips {
    * @param string $title The appropriate value of page_name or cl_to for the category in the database.
    */
   private static function populateLookupFromCategory( $title ) {
-    $dbr = wfGetDB( DB_REPLICA );
+    $dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
     $result = $dbr->select( Array( 'page', 'categorylinks' ),
                             Array( 'page_id', 'page_namespace', 'page_title' ),
@@ -333,22 +334,11 @@ class WikiTooltips {
   }
 
   /**
-   * Gets a Parser and ParserOptions instance by cloning the main parser, using the same approach as MediaWiki's
-   * internal messages API.
-   * @global Parser $wgParser The main parser object.
-   * @global Array $wgParserConf The main parser configuration.
+   * Gets a Parser
    */
   private static function initializeParser() {
-    global $wgParser, $wgParserConf;
-
-    if ( self::$mParser === null && isset( $wgParser ) ) {
-      $wgParser->firstCallInit();
-      $class = $wgParserConf['class'];
-      if ( $class == 'ParserDiffTest' ) {
-        self::$mParser = new $class( $wgParserConf );
-      } else {
-        self::$mParser = clone $wgParser;
-      }
+    if ( self::$mParser === null ) {
+		self::$mParser = MediaWikiServices::getInstance()->getParserFactory()->create();
     }
   }
 
