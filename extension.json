@@ -1,108 +1,111 @@
 {
-  "name": "TippingOver",
-  "namemsg": "tippingover-extensionname",
-  "type": "other",
-  "author": "[http://www.mediawiki.org/wiki/User:OoEyes Shawn Bruckner]",
-  "version": "0.6.8",
-  "url": "http://github.com/oOeyes/TippingOver",
-  "descriptionmsg": "tippingover-desc",
-  "license-name": "GPL-2.0+",
-  "config": {
-    "_prefix": "wgto",
-    "EnableInNamespaces" : {
-      "0": true,
-      "1": false,
-      "2": true,
-      "3": false,
-      "4": true,
-      "5": false,
-      "6": false,
-      "7": false,
-      "8": false,
-      "9": false,
-      "10": false,
-      "11": false,
-      "12": false,
-      "13": false,
-      "14": true,
-      "15": false,
-      "_merge_strategy": "array_plus"
-    },
-    "PreprocessCategoryFilter": true,
-    "EnableOnImageLinks": true,
-    "NamespacesWithTooltips" : {
-      "0": true,
-      "1": false,
-      "2": true,
-      "3": false,
-      "4": false,
-      "5": false,
-      "6": false,
-      "7": false,
-      "8": false,
-      "9": false,
-      "10": false,
-      "11": false,
-      "12": false,
-      "13": false,
-      "14": false,
-      "15": false,
-      "_merge_strategy": "array_plus"
-    },
-    "EarlyTargetRedirectFollow": true,
-    "EarlyCategoryFiltering": false,
-    "EnablingCategory": "Has tooltips enabled",
-    "DisablingCategory": "Has tooltips disabled",
-    "EarlyPageTitleParse": true,
-    "AssumeNonemptyPageTitle": false,
-    "EarlyExistsCheck": true,
-    "AllowTwoRequestProcess": false,
-    "LoadingTooltip": "MediaWiki:To-loading-tooltip",
-    "LateTargetRedirectFollow": true,
-    "LateCategoryFiltering": false,
-    "LatePageTitleParse": false,
-    "LateExistsCheck": true,
-    "MissingPageTooltip": "MediaWiki:To-missing-page-tooltip",
-    "EmptyPageNameTooltip": "MediaWiki:To-empty-page-name-tooltip"
-  },
-  "Hooks": {
-    "BeforeInitialize" : "WikiTooltips::initializeHooksAndModule",
-    "ApiBeforeMain" : "WikiTooltips::onApiBeforeMain",
-    "ParserFirstCallInit" : "WikiTooltips::initializeParserHooks",
-    "MakeGlobalVariablesScript": "WikiTooltips::registerParsedConfigVarsForScriptExport",
-    "HtmlPageLinkRendererEnd": "WikiTooltips::linkTooltipRender",
-    "ImageBeforeProduceHTML": "WikiTooltips::imageLinkTooltipStartRender",
-    "ThumbnailBeforeProduceHTML": "WikiTooltips::imageLinkTooltipFinishRender"
-  },
-  "ResourceModules": {
-    "ext.TippingOver.wikiTooltips": {
-      "position": "top",
-      "scripts": "modules/toWikiTooltips.js",
-      "styles": "modules/toWikiTooltips.css"
-    }
-  },
-  "ResourceFileModulePaths": {
-    "localBasePath": "",
-    "remoteExtPath": "TippingOver"
-  },
-  "ExtensionMessagesFiles": {
-    "TippingOverMagic": "TippingOver.i18n.php"
-  },
-  "MessagesDirs": {
-    "TippingOver": "i18n"
-  },
-  "APIModules" : {
-    "tooltip" : {
-		"class": "ApiQueryTooltip",
-		"services": ["PageStore", "DBLoadBalancer"]
-	}
-  },
-  "AutoloadClasses": {
-    "TippingOverConfiguration": "includes/TippingOverConfiguration.php",
-    "WikiTooltips": "includes/WikiTooltips.php",
-    "WikiTooltipsCore": "includes/WikiTooltipsCore.php",
-    "ApiQueryTooltip": "includes/ApiQueryTooltip.php",
-    "TippingOverCategoryFinder": "includes/TippingOverCategoryFinder.php"
-  },
-  "manifest_version": 1
+	"name": "TippingOver",
+	"namemsg": "tippingover-extensionname",
+	"type": "other",
+	"author": "[http://www.mediawiki.org/wiki/User:OoEyes Shawn Bruckner]",
+	"version": "0.6.8",
+	"url": "http://github.com/oOeyes/TippingOver",
+	"descriptionmsg": "tippingover-desc",
+	"license-name": "GPL-2.0+",
+	"config": {
+		"_prefix": "wgto",
+		"EnableInNamespaces": {
+			"0": true,
+			"1": false,
+			"2": true,
+			"3": false,
+			"4": true,
+			"5": false,
+			"6": false,
+			"7": false,
+			"8": false,
+			"9": false,
+			"10": false,
+			"11": false,
+			"12": false,
+			"13": false,
+			"14": true,
+			"15": false,
+			"_merge_strategy": "array_plus"
+		},
+		"PreprocessCategoryFilter": true,
+		"EnableOnImageLinks": true,
+		"NamespacesWithTooltips": {
+			"0": true,
+			"1": false,
+			"2": true,
+			"3": false,
+			"4": false,
+			"5": false,
+			"6": false,
+			"7": false,
+			"8": false,
+			"9": false,
+			"10": false,
+			"11": false,
+			"12": false,
+			"13": false,
+			"14": false,
+			"15": false,
+			"_merge_strategy": "array_plus"
+		},
+		"EarlyTargetRedirectFollow": true,
+		"EarlyCategoryFiltering": false,
+		"EnablingCategory": "Has tooltips enabled",
+		"DisablingCategory": "Has tooltips disabled",
+		"EarlyPageTitleParse": true,
+		"AssumeNonemptyPageTitle": false,
+		"EarlyExistsCheck": true,
+		"AllowTwoRequestProcess": false,
+		"LoadingTooltip": "MediaWiki:To-loading-tooltip",
+		"LateTargetRedirectFollow": true,
+		"LateCategoryFiltering": false,
+		"LatePageTitleParse": false,
+		"LateExistsCheck": true,
+		"MissingPageTooltip": "MediaWiki:To-missing-page-tooltip",
+		"EmptyPageNameTooltip": "MediaWiki:To-empty-page-name-tooltip"
+	},
+	"Hooks": {
+		"BeforeInitialize": "WikiTooltips::initializeHooksAndModule",
+		"ApiBeforeMain": "WikiTooltips::onApiBeforeMain",
+		"ParserFirstCallInit": "WikiTooltips::initializeParserHooks",
+		"MakeGlobalVariablesScript": "WikiTooltips::registerParsedConfigVarsForScriptExport",
+		"HtmlPageLinkRendererEnd": "WikiTooltips::linkTooltipRender",
+		"ImageBeforeProduceHTML": "WikiTooltips::imageLinkTooltipStartRender",
+		"ThumbnailBeforeProduceHTML": "WikiTooltips::imageLinkTooltipFinishRender"
+	},
+	"ResourceModules": {
+		"ext.TippingOver.wikiTooltips": {
+			"position": "top",
+			"scripts": "modules/toWikiTooltips.js",
+			"styles": "modules/toWikiTooltips.css"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "TippingOver"
+	},
+	"ExtensionMessagesFiles": {
+		"TippingOverMagic": "TippingOver.i18n.php"
+	},
+	"MessagesDirs": {
+		"TippingOver": "i18n"
+	},
+	"APIModules": {
+		"tooltip": {
+			"class": "ApiQueryTooltip",
+			"services": [
+				"PageStore",
+				"DBLoadBalancer"
+			]
+		}
+	},
+	"AutoloadClasses": {
+		"TippingOverConfiguration": "includes/TippingOverConfiguration.php",
+		"WikiTooltips": "includes/WikiTooltips.php",
+		"WikiTooltipsCore": "includes/WikiTooltipsCore.php",
+		"ApiQueryTooltip": "includes/ApiQueryTooltip.php",
+		"TippingOverCategoryFinder": "includes/TippingOverCategoryFinder.php"
+	},
+	"manifest_version": 1
 }

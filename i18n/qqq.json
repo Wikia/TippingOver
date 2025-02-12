@@ -1,14 +1,14 @@
 {
-  "@metadata" : {
-    "authors" : [
-      "OOeyes"
-    ]
-  },
-  "tippingover"                 : "The name of the extension's entry in Special:SpecialPages",
-  "tippingover-extensionname"   : "The name of the extension",
-  "tippingover-desc"            : "{{desc}}",
-  "to-tooltip-page-name"        : "{{notranslate}}",
-  "to-loading-tooltip"          : "{{notranslate}}",
-  "to-missing-page-tooltip"     : "{{notranslate}}",
-  "to-empty-page-name-tooltip"  : "{{notranslate}}"
+	"@metadata": {
+		"authors": [
+			"OOeyes"
+		]
+	},
+	"tippingover": "The name of the extension's entry in Special:SpecialPages",
+	"tippingover-extensionname": "The name of the extension",
+	"tippingover-desc": "{{desc}}",
+	"to-tooltip-page-name": "{{notranslate}}",
+	"to-loading-tooltip": "{{notranslate}}",
+	"to-missing-page-tooltip": "{{notranslate}}",
+	"to-empty-page-name-tooltip": "{{notranslate}}"
 }

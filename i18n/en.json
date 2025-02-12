@@ -1,18 +1,18 @@
 {
-  "@metadata" : {
-    "authors" : [
-      "OOeyes"
-    ]
-  },
-  "tippingover"                    : "TippingOver",
-  "tippingover-extensionname"      : "TippingOver",
-  "tippingover-desc"               : "An extension allowing editors to create tooltips for wiki links using either wiki pages or uploaded images.",
-  "to-tooltip-page-name"           : "$1/Tooltip",
-  "to-loading-tooltip"             : "",
-  "to-missing-page-tooltip"        : "",
-  "to-empty-page-name-tooltip"     : "",
-  "apihelp-tooltip-summary"        : "Given a target page and/or tooltip page for a link, returns one or more of the following items: the title of the tooltip page, whether or not it is an image from the File: namespace, whether the tooltip page exists, whether it passes a category filter check, and/or the rendered content of the tooltip page itself.'",
-  "apihelp-tooltip-param-target"   : "The title of the page the link links to. Optional unless the \"categoryfilter\" option is requested or the tooltip page name is not supplied.",
-  "apihelp-tooltip-param-tooltip"  : "The title of the page to get tooltip content from. Optional if the target page name is supplied and completely ignored if the \"exists\" and \"text\" options are not requsted.",
-  "apihelp-tooltip-param-options"  : "An pipe-separated list containing one or more of the following: \"text\": returns the parsed tooltip output to show in \"text\" unless any verification requested in other options fails; \"follow\": if target is redirect, use destination page as target instead; \"title\": returns the title of the tooltip page in \"tooltipTitle\"; \"image\": indicates whether the tooltip page is from the File namespace in \"isImage\" \"exists\": verify the page exists first and return this in \"exists\"; \"cat\": verify the page passes category filter options and return this in \"passesCategoryFilter\"."
+	"@metadata": {
+		"authors": [
+			"OOeyes"
+		]
+	},
+	"tippingover": "TippingOver",
+	"tippingover-extensionname": "TippingOver",
+	"tippingover-desc": "An extension allowing editors to create tooltips for wiki links using either wiki pages or uploaded images.",
+	"to-tooltip-page-name": "$1/Tooltip",
+	"to-loading-tooltip": "",
+	"to-missing-page-tooltip": "",
+	"to-empty-page-name-tooltip": "",
+	"apihelp-tooltip-summary": "Given a target page and/or tooltip page for a link, returns one or more of the following items: the title of the tooltip page, whether or not it is an image from the File: namespace, whether the tooltip page exists, whether it passes a category filter check, and/or the rendered content of the tooltip page itself.'",
+	"apihelp-tooltip-param-target": "The title of the page the link links to. Optional unless the \"categoryfilter\" option is requested or the tooltip page name is not supplied.",
+	"apihelp-tooltip-param-tooltip": "The title of the page to get tooltip content from. Optional if the target page name is supplied and completely ignored if the \"exists\" and \"text\" options are not requsted.",
+	"apihelp-tooltip-param-options": "An pipe-separated list containing one or more of the following: \"text\": returns the parsed tooltip output to show in \"text\" unless any verification requested in other options fails; \"follow\": if target is redirect, use destination page as target instead; \"title\": returns the title of the tooltip page in \"tooltipTitle\"; \"image\": indicates whether the tooltip page is from the File namespace in \"isImage\" \"exists\": verify the page exists first and return this in \"exists\"; \"cat\": verify the page passes category filter options and return this in \"passesCategoryFilter\"."
 }

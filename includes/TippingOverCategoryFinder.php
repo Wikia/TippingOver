@@ -42,7 +42,7 @@ final class TippingOverCategoryFinder {
 	/** @var array Array of article/category IDs */
 	protected $next = [];
 
-	/** @var int Max layer depth **/
+	/** @var int Max layer depth */
 	protected $maxdepth = -1;
 
 	/** @var array Array of DBKEY category names */
@@ -129,7 +129,7 @@ final class TippingOverCategoryFinder {
 	/**
 	 * This functions recurses through the parent representation, trying to match the conditions
 	 * @param int $id The article/category to check
-	 * @param array $conds The array of categories to match
+	 * @param array &$conds The array of categories to match
 	 * @param array $path Used to check for recursion loops
 	 * @return bool Does this match the conditions?
 	 */
