@@ -1,6 +1,8 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Title\Title;
 
 /**
  * This static class contains tooltip-related functions needed both by index.php and api.php calls.
@@ -32,7 +34,7 @@ class WikiTooltipsCore {
 	/**
 	 * Gets a Title object for the appropriate filter category, or returns null if there is an error getting it. Note
 	 * this function does not check to see if category filtering is disabled.
-	 * @return The Title object of the appropriate root category or null if there is an error generating it..
+	 * @return Title Title object of the appropriate root category or null if there is an error generating it..
 	 */
 	public static function getFilterCategoryTitle( $conf ) {
 		if ( $conf->enablingCategory() !== null ) {
@@ -49,8 +51,8 @@ class WikiTooltipsCore {
 	 * @return Title|null The original title if it isn't a redirect or the title of the redirect target if it is.
 	 */
 	public static function followRedirect( ?Title $title ): ?Title {
-	// Optimization: Use isRedirect() so that we only create a full WikiPage for pages known to be redirects.
-	// Loading a WikiPage always triggers a DB query, making it expensive.
+	   // Optimization: Use isRedirect() so that we only create a full WikiPage for pages known to be redirects.
+	   // Loading a WikiPage always triggers a DB query, making it expensive.
 		if ( $title && $title->isRedirect() ) {
 			$services = MediaWikiServices::getInstance();
 			$page = $services->getWikiPageFactory()->newFromTitle( $title );
@@ -68,14 +70,14 @@ class WikiTooltipsCore {
 	 * Indicate tooltip attachment is unsafe in the current state. (Usually means we're parsing the content of a tooltip,
 	 * so the attachment process is likely to call the parser redundantly and cause a fatal error.)
 	 */
-	public static function flagTooltipAttachmentUnsafe() {
+	public static function flagTooltipAttachmentUnsafe(): void {
 		self::$mIsTooltipAttachmentSafe = false;
 	}
 
 	/**
 	 * Indicate tooltip attachment is safe in the current state.
 	 */
-	public static function flagTooltipAttachmentSafe() {
+	public static function flagTooltipAttachmentSafe(): void {
 		self::$mIsTooltipAttachmentSafe = true;
 	}
 
@@ -85,7 +87,7 @@ class WikiTooltipsCore {
 	 * @param string $out The parser output to strip outer tags from.
 	 * @return string The output sans outer tags
 	 */
-	public static function stripOuterTags( $out ) {
+	public static function stripOuterTags( $out ): string {
 		$matches = [];
 		$old = null;
 		$new = $out;
@@ -101,9 +103,9 @@ class WikiTooltipsCore {
 	/**
 	 * Returns the wikitext used to retrieve the appropriate content for a given tooltip page.
 	 * @param Title $title A title object for the given tooltip page.
-	 * @return string The wikitext to parse to get the appropriate content.
+	 * @return string|null The wikitext to parse to get the appropriate content.
 	 */
-	public static function getTooltipWikiText( $title ) {
+	public static function getTooltipWikiText( $title ): ?string {
 		if ( $title !== null ) {
 			if ( $title->getNamespace() === NS_FILE ) {
 				return '[[' . $title->getPrefixedText() . '|link=]]';
@@ -124,7 +126,7 @@ class WikiTooltipsCore {
 	 * @param array $params The parameters and values together, not yet expanded or trimmed.
 	 * @return array The function output along with relevant parser options.
 	 */
-	public static function tipforRender( $parser, $frame, $params ) {
+	public static function tipforRender( $parser, $frame, $params ): array {
 		if ( self::$mIsTooltipAttachmentSafe ) {
 		  // Tooltip attachment is flagged as safe, so we shouldn't be in the API module, kick it to WikiTooltips.
 			return WikiTooltips::tipforRender( $parser, $frame, $params );
