@@ -610,20 +610,6 @@ class WikiTooltips {
 		}
 	}
 
-// * @since 1.35
-//*
-//* @param LinkRenderer $linkRenderer
-//* @param LinkTarget $target LinkTarget object that the link is pointing to
-//* @param bool $isKnown Whether the page is known or not
-//* @param string|HtmlArmor &$text Contents that the `<a>` tag should have; either a plain,
-//*   unescaped string or an HtmlArmor object
-//* @param string[] &$attribs Final HTML attributes of the `<a>` tag, after processing, in
-//	 *   associative array form
-//	 * @param string &$ret Value to return if your hook returns false
-//	 * @return bool|void True or no return value to continue or false to abort. If you return
-//	 *   true, an `<a>` element with HTML attributes $attribs and contents $html will be
-//	 *   returned. If you return false, $ret will be returned.
-
 	/**
 	 * Attached to the LinkEnd hook of the MediaWiki linker, this function will add appropriate data elements and other
 	 * attributes to any link that should have or might have a tooltip, preparing it for the client-side script to
