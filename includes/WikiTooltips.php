@@ -1,7 +1,15 @@
 <?php
 
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
 /**
  * This static class handles most basic tooltip functions that occur during a page load through index.php.
@@ -125,24 +133,37 @@ class WikiTooltips {
 	private static $mUseTwoRequestProcess;
 
 	/**
-	 * @param Title &$title The title being requested.
-	 * @param Article &$article The article object. Ignored.
-	 * @param OutputPage &$output The output page.
-	 * @param User &$user The user object. Ignored.
+	 * @param Title $title The title being requested.
+	 * @param $unused
+	 * @param OutputPage $output The output page.
+	 * @param User $user The user object. Ignored.
 	 * @param WebRequest $request The request object. Ignored.
-	 * @param MediaWiki $mediawiki The MediaWiki object. Ignored.
+	 * @param $mediaWikiEntryPoint
+	 * @see BeforeInitializeHook
 	 */
-	public static function initializeHooksAndModule( &$title, &$article, &$output, &$user, $request, $mediawiki ) {
+	public static function initializeHooksAndModule(
+		$title,
+		$unused,
+		$output,
+		$user,
+		$request,
+		$mediaWikiEntryPoint
+	) {
 		self::initialize(
 		$title,
 		$output
 		);
 	}
 
-	public static function onApiBeforeMain( ApiMain $apiMain ) {
+	/**
+	 * @param ApiMain &$main
+	 * @return void True or no return value to continue or false to abort
+	 * @see ApiBeforeMainHook
+	 */
+	public static function onApiBeforeMain( &$main ) {
 		self::initialize(
-		$apiMain->getTitle(),
-		$apiMain->getOutput()
+		$main->getTitle(),
+		$main->getOutput()
 		);
 	}
 
@@ -153,7 +174,7 @@ class WikiTooltips {
 	 * @param $title
 	 * @param $output
 	 */
-	public static function initialize( $title, $output ) {
+	public static function initialize( $title, $output ): void {
 		self::$mConf = new TippingOverConfiguration();
 
 		if ( self::enabledForTitle( $title ) ) {
@@ -167,7 +188,7 @@ class WikiTooltips {
 	 * @param Title|null $title
 	 * @return bool
 	 */
-	private static function enabledForTitle( ?Title $title ) {
+	private static function enabledForTitle( ?Title $title ): bool {
 		return self::$mConf->enabled() && self::$mConf->enableInNamespace(
 		$title ? $title->getNamespace() : NS_SPECIAL
 		);
@@ -175,10 +196,11 @@ class WikiTooltips {
 
 	/**
 	 * Calls all parser function registrations functions.
-	 * @param Parser &$parser The parser object being initialized.
+	 * @param Parser $parser The parser object being initialized.
 	 * @return bool true to indicate no problems.
+	 * @see ParserFirstCallInitHook
 	 */
-	public static function initializeParserHooks( &$parser ) {
+	public static function initializeParserHooks( $parser ) {
 		$parser->setFunctionHook( 'tipfor', 'WikiTooltipsCore::tipforRender', SFH_OBJECT_ARGS );
 		return true;
 	}
@@ -188,6 +210,7 @@ class WikiTooltips {
 	 * client-side tooltip functions.
 	 * @param array &$vars The variables to export.
 	 * @param OutputPage $out An OutputPage instance. Not used.
+	 * @see MakeGlobalVariablesScriptHook
 	 */
 	public static function registerParsedConfigVarsForScriptExport( &$vars, $out ) {
 		if ( !self::enabledForTitle( $out->getTitle() ) ) {
@@ -211,7 +234,7 @@ class WikiTooltips {
 	 * array, allowing for category filtering to be done without querying the database later.
 	 * @param string $title The appropriate value of page_name or cl_to for the category in the database.
 	 */
-	private static function populateLookupFromCategory( $title ) {
+	private static function populateLookupFromCategory( $title ): void {
 		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		$result = $dbr->select( [ 'page', 'categorylinks' ],
@@ -240,7 +263,7 @@ class WikiTooltips {
 	 * Initiates the prefetch of page ids for category filtering should the extension configuration have it properly
 	 * enabled in the correct mode.
 	 */
-	private static function populateLookup() {
+	private static function populateLookup(): void {
 		$title = WikiTooltipsCore::getFilterCategoryTitle( self::$mConf );
 		if ( $title !== null ) {
 			self::populateLookupFromCategory( $title->getDBKey() );
@@ -253,7 +276,7 @@ class WikiTooltips {
 	 * @param int $id The page id to search for.
 	 * @return bool True if the id was found, false if not.
 	 */
-	private static function isInCategoryLookup( $id ) {
+	private static function isInCategoryLookup( $id ): bool {
 		$id = intval( $id );
 		$min = 0;
 		$max = count( self::$mCategoryFilterLookup ) - 1;
@@ -277,10 +300,10 @@ class WikiTooltips {
 	/**
 	 * Returns true if the given namespace index and title pair passes the category filtering enabled by the current
 	 * configuration, or always passes true if no such filtering is enabled or if late checks are enabled.
-	 * @param Title $title The title to search for.
+	 * @param Title|null $title The title to search for.
 	 * @return bool False if it fails the filter and should have its tooltip disabled, true to continue processing.
 	 */
-	private static function passesCategoryFilter( $title ) {
+	private static function passesCategoryFilter( ?Title $title ) {
 		if ( self::$mConf->earlyCategoryFiltering() ) {
 			if ( self::$mConf->preprocessCategoryFilter() ) {
 				if ( self::isInCategoryLookup( $title->getArticleID() ) ) {
@@ -316,7 +339,7 @@ class WikiTooltips {
 	 * @param string $unencoded The unencoded string.
 	 * @return string The encoded string.
 	 */
-	private static function encodeAllSpecial( $unencoded ) {
+	private static function encodeAllSpecial( $unencoded ): string {
 		$encoded = "";
 		$c = null;
 		$safeChars = "/[0-9A-Za-z]/";
@@ -336,7 +359,7 @@ class WikiTooltips {
 	/**
 	 * Gets a Parser
 	 */
-	private static function initializeParser() {
+	private static function initializeParser(): void {
 		if ( self::$mParser === null ) {
 			  self::$mParser = MediaWikiServices::getInstance()->getParserFactory()->create();
 		}
@@ -346,14 +369,14 @@ class WikiTooltips {
 	 * Disables tooltip attachment until afterTooltipContentParse is called. Intended to provide a way to disable
 	 * tooltip attachment when parsing the actual content of a tooltip.
 	 */
-	public static function beforeTooltipContentParse() {
+	public static function beforeTooltipContentParse(): void {
 		self::$mIsParsingTooltipContent = true;
 	}
 
 	/**
 	 * Reenables tooltip attachment after beforeTooltipContentParse is called.
 	 */
-	public static function afterTooltipContentParse() {
+	public static function afterTooltipContentParse(): void {
 		self::$mIsParsingTooltipContent = false;
 	}
 
@@ -364,7 +387,7 @@ class WikiTooltips {
 	 * @param string &$html Returns the page content parsed to HTML or null.
 	 * @param bool &$doPreload Returns true if the tooltip show use preload logic or false otherwise.
 	 */
-	private static function parseTooltip( $titleText, &$html, &$doPreload ) {
+	private static function parseTooltip( $titleText, &$html, &$doPreload ): void {
 		if ( self::$mParser !== null && $titleText !== null && trim( $titleText ) !== '' ) {
 			$title = Title::newFromText( $titleText );
 			WikiTooltipsCore::flagTooltipAttachmentUnsafe(); // tooltip attaching risks fatal redundant parse here, so disable
@@ -390,7 +413,7 @@ class WikiTooltips {
 	/**
 	 * Performs potentially expensive initialization tasks which require parser or database access.
 	 */
-	private static function performDelayedInitialization() {
+	private static function performDelayedInitialization(): void {
 		self::initializeParser();
 		self::parseTooltip( self::$mConf->loadingTooltip(),
 						self::$mLoadingTooltipHtml,
@@ -529,7 +552,7 @@ class WikiTooltips {
 	 * @param array $setupInfo Setup information from runEarlyTooltipChecks().
 	 * @param array &$attribs An array of HTML attributes with name/value pairs to add tooltip-related attributes to.
 	 */
-	private static function setUpAttribs( $setupInfo, &$attribs ) {
+	private static function setUpAttribs( $setupInfo, &$attribs ): void {
 		$tooltipId = self::encodeAllSpecial( $setupInfo['targetTitle']->getFullText() );
 		if ( array_key_exists( 'class', $attribs ) ) {
 			$attribs['class'] .= ' to_hasTooltip';
@@ -572,7 +595,7 @@ class WikiTooltips {
 	 * @param array &$attribs An array of HTML attributes with name/value pairs to add tooltip-related attributes to.
 	 * @return bool True if there is a tooltip and tooltip attribtues have been added.
 	 */
-	private static function maybeAttachTooltip( ?Title $target, &$attribs ) {
+	private static function maybeAttachTooltip( ?Title $target, &$attribs ): bool {
 		if ( $target !== null ) {
 			$setupInfo = self::runEarlyTooltipChecks( $target );
 
@@ -594,11 +617,15 @@ class WikiTooltips {
 	 * @param LinkRenderer $linkRenderer
 	 * @param LinkTarget $target The title of the target page.
 	 * @param bool $isKnown boolean indicating whether the page is known or not
-	 * @param string &$html The inner content of the <a> tag.
-	 * @param array &$attribs The attributes of the <a> tag and their values.
+	 * @param string|HtmlArmor &$text The inner content of the <a> tag.
+	 * @param string[] &$attribs The attributes of the <a> tag and their values.
 	 * @param string &$ret Alternate HTML to return rather than the <a> tag the linker would generate.
+	 * @return bool|void True or no return value to continue or false to abort. If you return
+	 *   				true, an `<a>` element with HTML attributes $attribs and contents $html will be
+	 *   				returned. If you return false, $ret will be returned.
+	 * @see HtmlPageLinkRendererEndHook
 	 */
-	public static function linkTooltipRender( $linkRenderer, $target, $isKnown, &$html, &$attribs, &$ret ) {
+	public static function linkTooltipRender( $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
 		if ( !self::$mTooltipsEnabledHere ) {
 			return true;
 		}
@@ -617,23 +644,31 @@ class WikiTooltips {
 	/**
 	 * Attached to ImageBeforeProduceHTML, this collects the target of an image link and uses an ugly hack to mark the
 	 * image link for processing in a later hook where it's possibly to attach attributes to the link.
-	 * @param Skin &$skin The current skin. Ignored.
+	 * @param $unused
 	 * @param Title &$title Title of the image.
 	 * @param File &$file File of the image. Ignored.
 	 * @param array &$frameParams Various parameters for the image and link.
 	 * @param array &$handlerParams Various parameters for the image and link. Ignored.
 	 * @param string &$time The timestamp of the image or false for the current image. Ignored.
 	 * @param string &$res HTML override. Not used.
+	 * @param $parser
+	 * @param &$query
+	 * @param &$widthOption
 	 * @return bool false to use the HTML override. true returned instead to continue normal processing.
+	 * @see ImageBeforeProduceHTMLHook
 	 */
-	public static function imageLinkTooltipStartRender( &$skin,
-													  &$title,
-													  &$file,
-													  &$frameParams,
-													  &$handlerParams,
-													  &$time,
-													  &$res
-												   ) {
+	public static function imageLinkTooltipStartRender(
+		$unused,
+		&$title,
+		&$file,
+		&$frameParams,
+		&$handlerParams,
+		&$time,
+		&$res,
+		$parser,
+		&$query,
+		&$widthOption
+	) {
 		if ( !self::$mTooltipsEnabledHere || !self::$mConf->enableOnImageLinks() ) {
 			return true;
 		}
@@ -679,6 +714,7 @@ class WikiTooltips {
 	 * @param array &$attribs The attributes for the img tag.
 	 * @param array &$linkAttribs The attributes for the a tag.
 	 * @return bool
+	 * @see ThumbnailBeforeProduceHTMLHook
 	 */
 	public static function imageLinkTooltipFinishRender( $thumbnail, &$attribs, &$linkAttribs ) {
 		if ( !self::$mTooltipsEnabledHere || !self::$mConf->enableOnImageLinks() ) {
@@ -725,7 +761,7 @@ class WikiTooltips {
 	 * @param array $params The parameters and values together, not yet expanded or trimmed.
 	 * @return array The function output along with relevant parser options.
 	 */
-	public static function tipforRender( $parser, $frame, $params ) {
+	public static function tipforRender( $parser, $frame, $params ): array {
 		if ( !self::$mIsFullyInitialized ) {
 			self::performDelayedInitialization();
 		}

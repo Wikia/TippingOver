@@ -3,8 +3,8 @@
  * This is copy of CategoryFinder class, which was deprecated in MW 1.31.
  * For backwards compatibility it was added into TippingOver extension.
  */
-
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\IDatabase;
 
 /**
@@ -59,16 +59,18 @@ final class TippingOverCategoryFinder {
 
 	/**
 	 * Initializes the instance. Do this prior to calling run().
-	 * @param array $articleIds Array of article IDs
-	 * @param array $categories FIXME
-	 * @param string $mode FIXME, default 'AND'.
-	 * @param int $maxdepth Maximum layer depth. Where:
-	 * 	-1 means deep recursion (default);
-	 * 	 0 means no-parents;
-	 * 	 1 means one parent layer, etc.
-	 * @todo FIXME: $categories/$mode
+	 * @param array $articleIds Array of article IDs to check for category membership
+	 * @param array $categories Array of category names to check against. Each category name should be
+	 *                         the base name without the 'Category:' prefix
+	 * @param string $mode The matching mode for category conditions:
+	 *                    - 'AND': Article must be in all specified categories (default)
+	 *                    - 'OR': Article must be in at least one of the specified categories
+	 * @param int $maxdepth Maximum layer depth for category traversal where:
+	 *                     -1 means deep recursion (default)
+	 *                      0 means no-parents
+	 *                      1 means one parent layer, etc.
 	 */
-	public function seed( $articleIds, $categories, $mode = 'AND', $maxdepth = -1 ) {
+	public function seed( $articleIds, $categories, $mode = 'AND', $maxdepth = -1 ): void {
 		$this->articles = $articleIds;
 		$this->next = $articleIds;
 		$this->mode = $mode;
@@ -90,7 +92,7 @@ final class TippingOverCategoryFinder {
 	 * then checks the articles if they match the conditions
 	 * @return array Array of page_ids (those given to seed() that match the conditions)
 	 */
-	public function run() {
+	public function run(): array {
 		$this->dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		$i = 0;
@@ -133,7 +135,7 @@ final class TippingOverCategoryFinder {
 	 * @param array $path Used to check for recursion loops
 	 * @return bool Does this match the conditions?
 	 */
-	private function check( $id, &$conds, $path = [] ) {
+	private function check( $id, &$conds, $path = [] ): bool {
 		// Check for loops and stop!
 		if ( in_array( $id, $path ) ) {
 			return false;
@@ -188,7 +190,7 @@ final class TippingOverCategoryFinder {
 	/**
 	 * Scans a "parent layer" of the articles/categories in $this->next
 	 */
-	private function scanNextLayer() {
+	private function scanNextLayer(): void {
 		# Find all parents of the article currently in $this->next
 		$layer = [];
 		$res = $this->dbr->select(

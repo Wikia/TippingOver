@@ -1,7 +1,10 @@
 <?php
 
+use MediaWiki\Api\ApiMain;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\PageRecord;
 use MediaWiki\Page\PageStore;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\NumericDef;
 use Wikimedia\Rdbms\ILoadBalancer;
@@ -38,8 +41,8 @@ class APIQueryTooltip extends APIBase {
 	public function __construct(
 	  ApiMain $mainModule,
 	  $moduleName,
-	  private PageStore $pageStore,
-	  private ILoadBalancer $dbLoadBalancer
+	  private readonly PageStore $pageStore,
+	  private readonly ILoadBalancer $dbLoadBalancer
 	) {
 		parent::__construct( $mainModule, $moduleName );
 	}
@@ -47,7 +50,7 @@ class APIQueryTooltip extends APIBase {
 	/**
 	 * Initializes a ParserOptions instance.
 	 */
-	private function initializeParserOptions() {
+	private function initializeParserOptions(): void {
 		if ( $this->mParserOptions === null ) {
 			$this->mParserOptions = ParserOptions::newFromContext( $this->getContext() );
 			$this->mParserOptions->setWrapOutputClass( null );
@@ -95,7 +98,7 @@ class APIQueryTooltip extends APIBase {
 	 * @param $options Array of options, indexed by name and true for requested options.
 	 * @return string The tooltip page title in string form, or null if not needed or on errors.
 	 */
-	private function getTooltipTitleText( $options ) {
+	private function getTooltipTitleText( array $options ) {
 		if ( isset( $this->params['tooltip'] ) ) {
 			return $this->params['tooltip'];
 		}
@@ -138,7 +141,6 @@ class APIQueryTooltip extends APIBase {
 
 	/**
 	 * Parses the supplied wikitext.
-	 * @global Parser $wgParser The MediaWiki parser.
 	 * @param string $wikitext The text to parse.
 	 * @param Title $title The title to supply for the parser.
 	 * @return string The wikitext parsed to HTML.
@@ -152,7 +154,7 @@ class APIQueryTooltip extends APIBase {
 	 * Processes the API requests and adds the appropriate results.
 	 * @param array $options The array of options from the getOptions function.
 	 */
-	private function addResults( $options ) {
+	private function addResults( array $options ): void {
 		$result = $this->getResult();
 
 		$targetTitle = Title::newFromText( $this->params['target'] );
@@ -189,7 +191,11 @@ class APIQueryTooltip extends APIBase {
 					$result->addValue( null, 'tooltipTitle', $tooltipTitle->getPrefixedText() );
 				}
 				if ( $options['image'] ) {
-					$result->addValue( null, 'isImage', ( $tooltipTitle->getNamespace() === NS_FILE ) ? 'true' : 'false' );
+					$result->addValue(
+						null,
+						'isImage',
+						( $tooltipTitle->getNamespace() === NS_FILE ) ? 'true' : 'false'
+					);
 				}
 				if ( !$options['exists'] || $tooltipTitle->exists() ) {
 					if ( $options['exists'] ) {
@@ -214,7 +220,7 @@ class APIQueryTooltip extends APIBase {
 	/**
 	 * Executes the API request for given tooltip content.
 	 */
-	public function execute() {
+	public function execute(): void {
 		$this->mConf = new TippingOverConfiguration();
 		$this->params = $this->extractRequestParams();
 		$this->requireAtLeastOneParameter( $this->params, 'target', 'tooltip' );
@@ -262,7 +268,7 @@ class APIQueryTooltip extends APIBase {
 			}
 
 			if ( count( $titles ) > 0 ) {
-				$dbr = $this->dbLoadBalancer->getConnectionRef( DB_REPLICA );
+				$dbr = $this->dbLoadBalancer->getConnection( DB_REPLICA );
 				$conds = [];
 
 				foreach ( $titles as $namespace => $dbKeys ) {
@@ -278,7 +284,7 @@ class APIQueryTooltip extends APIBase {
 				  ->fetchPageRecords();
 
 				$touched = null;
-				/** @var \MediaWiki\Page\PageRecord $pageRecord */
+				/** @var PageRecord $pageRecord */
 				foreach ( $res as $pageRecord ) {
 					if ( $touched === null || $pageRecord->getTouched() > $touched ) {
 						$touched = $pageRecord->getTouched();

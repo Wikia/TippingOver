@@ -61,7 +61,7 @@ class TippingOverConfiguration {
 	 * @param int $index Index of a wiki namespace.
 	 * @return bool true if tooltips should be shown on pages in the namespace, false otherwise.
 	 */
-	public function enableInNamespace( $index ) {
+	public function enableInNamespace( $index ): bool {
 		return ( array_key_exists( $index, $this->mEnableInNamespaces ) &&
 			 $this->mEnableInNamespaces[$index]
 		   );
@@ -96,7 +96,7 @@ class TippingOverConfiguration {
 	 * @param int $index Index of a wiki namespace.
 	 * @return bool true if tooltips should be shown on links targeting pages in the specified namespace.
 	 */
-	public function namespaceWithTooltips( $index ) {
+	public function namespaceWithTooltips( $index ): bool {
 		return ( array_key_exists( $index, $this->mNamespacesWithTooltips ) &&
 			 $this->mNamespacesWithTooltips[$index]
 		   );
@@ -295,7 +295,7 @@ class TippingOverConfiguration {
 	 * as strings rather than the expected integer values. This converts those strings.
 	 * @param mixed &$setting The setting to be normalized.
 	 */
-	private function normalize( &$setting ) {
+	private function normalize( &$setting ): void {
 		if ( is_string( $setting ) ) {
 			switch ( $setting ) {
 				case "TO_DISABLE":
@@ -329,7 +329,7 @@ class TippingOverConfiguration {
 	 * @global int $wgtoPageTitleParse self::RUN_EARLY or self::RUN_LATE
 	 * @global int $wgtoExistsCheck self::DISABLE, self::RUN_EARLY, or self::RUN_LATE
 	 */
-	private function update() {
+	private function update(): void {
 		global $wgtoFollowTargetRedirects,
 		   $wgtoCategoryFiltering,
 		   $wgtoCategoryFilterMode,
@@ -413,7 +413,7 @@ class TippingOverConfiguration {
 	 * Performs validation of the given configuration, overriding settings as necessary to make the configuration coherent
 	 * or disabling TippingOver entirely in some cases. May output warnings in certain cases.
 	 */
-	private function validate() {
+	private function validate(): void {
 		if ( $this->mEnablingCategory !== null && !( is_string( $this->mEnablingCategory ) ) ) {
 			$this->mEnablingCategory = null;
 			$msg = '(TippingOver) Cannot interpret non-string value as a category page name in $wgEnablingCategory.' .
